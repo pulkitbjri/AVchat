@@ -17,6 +17,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import play.com.avwebrtc_firebase.NotificationActivities.RecieveCall
 import play.com.avwebrtc_firebase.NotificationActivities.StartCall
 
 
@@ -41,16 +42,11 @@ class LobbyActivity : AppCompatActivity() {
             Log.w("TAG", "clicked: " + adapter.getItem(position))
             if(adapter.getItem(position).second.online)
             {
-
                 var pos=adapter.getItem(position).first
-                //startVideoCall(adapter.getItem(position).first)
+
                 Toast.makeText(this@LobbyActivity,"Calling...",Toast.LENGTH_LONG).show()
 
-//                FirebaseData.database.getReference("callInit/$pos/id")
-//                    .setValue("$myID")
-
                 startActivity(Intent(this@LobbyActivity,StartCall::class.java)
-                    .putExtra("id","$myID")
                     .putExtra("callerId","$pos")
                     .putExtra("name",adapter.getItem(position).second.name))
 
@@ -78,7 +74,6 @@ class LobbyActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        callRef.addValueEventListener(callListener)
 
         callInitRef.addValueEventListener(callInitListener)
 
@@ -88,7 +83,6 @@ class LobbyActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        callRef.removeEventListener(callListener)
 
         callInitRef.removeEventListener(callInitListener)
 
@@ -97,49 +91,16 @@ class LobbyActivity : AppCompatActivity() {
     }
 
 
-    private fun startVideoCall(key: String) {
-        FirebaseData.getCallStatusReference(myID).setValue(true)
-        FirebaseData.getCallIdReference(key).onDisconnect().removeValue()
-        FirebaseData.getCallIdReference(key).setValue(myID)
-        VideoCallActivity.startCall(this@LobbyActivity, key)
-    }
-
-    private fun receiveVideoCall(key: String) {
-        VideoCallActivity.receiveCall(this, key)
-    }
-
-
-    private val callListener = object : ValueEventListener {
-        override fun onCancelled(p0: DatabaseError) {
-        }
-
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if (dataSnapshot.exists()) {
-                receiveVideoCall(dataSnapshot.getValue(String::class.java)!!)
-                callRef.removeValue()
-            }
-        }
-
-
-    }
-
     private val callInitListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
         }
-
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
-                var dialog : AlertDialog.Builder =AlertDialog.Builder(this@LobbyActivity)
-                dialog.setMessage("Call Incomming")
-                dialog.setPositiveButton("Yes") { dialog, id ->
-                    startVideoCall(dataSnapshot.getValue(String::class.java)!!)
-                    callRef.removeValue()
-                }
-                dialog.setNegativeButton("No",null)
-                dialog.show()
+                startActivity(Intent(this@LobbyActivity,RecieveCall::class.java)
+                    .putExtra("callerId",dataSnapshot.getValue(String::class.java)!!)
+                    )
 
 
-                callInitRef.removeValue()
 
             }
         }
