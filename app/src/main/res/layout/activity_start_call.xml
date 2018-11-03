@@ -10,7 +10,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="250dp" android:background="@color/colorConnected">
+            android:layout_height="250dp" android:background="@color/darkgreen">
         <TextView
                 android:text="VIDEO CALL"
                 android:layout_width="match_parent"

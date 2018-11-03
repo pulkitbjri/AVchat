@@ -11,11 +11,26 @@
                   <entry key="vectorAssetStep">
                     <value>
                       <PersistentState>
+                        <option name="children">
+                          <map>
+                            <entry key="clipartAsset">
+                              <value>
+                                <PersistentState>
+                                  <option name="values">
+                                    <map>
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/communication/ic_chat_black_24dp.xml" />
+                                    </map>
+                                  </option>
+                                </PersistentState>
+                              </value>
+                            </entry>
+                          </map>
+                        </option>
                         <option name="values">
                           <map>
-                            <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_old_telephone_ringing" />
-                            <entry key="sourceFile" value="C:\Users\pulkit nigam\Downloads\old-telephone-ringing.svg" />
+                            <entry key="color" value="ffffff" />
+                            <entry key="outputName" value="ic_chat_black_24dp" />
+                            <entry key="sourceFile" value="C:\Users\pulkit nigam\Downloads\call-answer.svg" />
                           </map>
                         </option>
                       </PersistentState>

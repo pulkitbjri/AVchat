@@ -16,5 +16,6 @@
     <color name="colorPrimaryAlpha">#663F51B5</color>
 
     <color name="semi_white">#66FFFFFF</color>
+    <color name="darkgreen">#00786c</color>
 
 </resources>

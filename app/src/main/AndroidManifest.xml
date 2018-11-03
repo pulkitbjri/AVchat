@@ -27,6 +27,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+
         </activity>
         <activity android:name=".IntroActivity">
             <intent-filter>
@@ -37,9 +38,13 @@
         </activity>
         <activity android:name=".LobbyActivity"/>
         <activity android:name=".VideoCallActivity"/>
+        <activity android:name=".VoiceCallActivity"/>
         <activity android:name=".NotificationActivities.RecieveCall">
         </activity>
         <activity android:name=".NotificationActivities.StartCall">
+        </activity>
+        <activity android:name=".Main2Activity">
+
         </activity>
     </application>
 

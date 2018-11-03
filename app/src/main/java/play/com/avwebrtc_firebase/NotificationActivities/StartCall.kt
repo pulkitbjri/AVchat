@@ -2,9 +2,7 @@ package play.com.avwebrtc_firebase.NotificationActivities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.util.Log
-import android.view.View
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -12,19 +10,19 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_start_call.*
 import play.com.avwebrtc_firebase.FirebaseData
 import play.com.avwebrtc_firebase.R
-import play.com.avwebrtc_firebase.VideoCallActivity
+import play.com.avwebrtc_firebase.VoiceCallActivity
 
 class StartCall : AppCompatActivity() {
 
     private lateinit var callRef: DatabaseReference
     private lateinit var callInitRef: DatabaseReference
 
-
+    var pos=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start_call)
 
-        var pos=intent.getStringExtra("callerId")
+         pos=intent.getStringExtra("callerId")
         callRef = FirebaseData.database.getReference("calls/${FirebaseData.myID}/id")
         callInitRef = FirebaseData.database.getReference("callInit/$pos/id")
         callInitRef.addValueEventListener(callInitListener)
@@ -73,7 +71,7 @@ class StartCall : AppCompatActivity() {
 
 
     private fun receiveVideoCall(key: String) {
-        VideoCallActivity.receiveCall(this, key)
+        VoiceCallActivity.receiveCall(this, key,pos)
         this.finish()
     }
 

@@ -1,4 +1,4 @@
-package play.com.avwebrtc_firebase.videocall
+package play.com.avwebrtc_firebase.VoiceCall
 
 
 import android.content.Context
@@ -10,11 +10,12 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import org.webrtc.*
 import play.com.avwebrtc_firebase.R
+import play.com.avwebrtc_firebase.videocall.*
 import java.util.concurrent.Executors
 
 
 
-enum class VideoCallStatus(val label: Int, val color: Int) {
+enum class VoiceCallStatus(val label: Int, val color: Int) {
     UNKNOWN(R.string.status_unknown, R.color.colorUnknown),
     CONNECTING(R.string.status_connecting, R.color.colorConnecting),
     DIALING(R.string.status_dialing, R.color.colorMatching),
@@ -23,7 +24,7 @@ enum class VideoCallStatus(val label: Int, val color: Int) {
     FINISHED(R.string.status_finished, R.color.colorConnected);
 }
 
-data class VideoRenderers(private var localView: SurfaceViewRenderer?, private var remoteView: SurfaceViewRenderer?) {
+data class VoiceRenderers(private var localView: SurfaceViewRenderer?, private var remoteView: SurfaceViewRenderer?) {
     val localRenderer: (VideoRenderer.I420Frame) -> Unit = { f ->
         localView?.renderFrame(f) ?: sink(f)
     }
@@ -45,28 +46,20 @@ data class VideoRenderers(private var localView: SurfaceViewRenderer?, private v
     }
 }
 
-class VideoCallSession(
+class VoiceCallSession(
     private val context: Context,
     private val isOfferingPeer: Boolean,
-    private val onStatusChangedListener: (VideoCallStatus) -> Unit,
-    private val signaler: FirebaseSignaler,
-    val videoRenderers: VideoRenderers
-) {
+    private val onStatusChangedListener: (VoiceCallStatus) -> Unit,
+    private val signaler: FirebaseSignaler
+)
+{
 
     private var peerConnection: PeerConnection? = null
-    private var videoSource: VideoSource? = null
     private var audioSource: AudioSource? = null
 
     private var mediaStream: MediaStream? = null
-    private var videoCapturer: VideoCapturer? = null
-    private var videoTrack: VideoTrack? = null
 
     private val eglBase = EglBase.create()
-
-
-    private val videoHeight = 1280
-    private val videoWidth = 720
-    private val videoFPS = 30
 
     val renderContext: EglBase.Context
         get() = eglBase.eglBaseContext
@@ -142,7 +135,7 @@ class VideoCallSession(
 
     init {
         signaler.messageHandler = this::onMessage
-        this.onStatusChangedListener(VideoCallStatus.DIALING)
+        this.onStatusChangedListener(VoiceCallStatus.DIALING)
         executor.execute(this::init)
     }
 
@@ -163,7 +156,7 @@ class VideoCallSession(
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.getValue(Boolean::class.java)!!) {
                     ref.removeEventListener(this)
-                    onStatusChangedListener(VideoCallStatus.CONNECTING)
+                    onStatusChangedListener(VoiceCallStatus.CONNECTING)
                     start()
                 }
             }
@@ -194,7 +187,11 @@ class VideoCallSession(
             keyType = PeerConnection.KeyType.ECDSA
         }
 
-        val rtcEvents = SimpleRTCEventHandler(this::handleLocalIceCandidate, this::addRemoteStream, this::removeRemoteStream)
+        val rtcEvents = SimpleRTCEventHandler(
+            this::handleLocalIceCandidate,
+            this::addRemoteStream,
+            this::removeRemoteStream
+        )
 
         peerConnection = factory.createPeerConnection(rtcConfig, rtcEvents)
     }
@@ -215,31 +212,30 @@ class VideoCallSession(
         val pcConstraints = MediaConstraints()
         pcConstraints.optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
         pcConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
-        pcConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
+//        pcConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
         return pcConstraints
     }
-
     private fun handleLocalIceCandidate(candidate: IceCandidate) {
         Log.w(TAG, "Local ICE candidate: $candidate")
         signaler.sendCandidate(candidate.sdpMLineIndex, candidate.sdpMid, candidate.sdp)
     }
 
     private fun addRemoteStream(stream: MediaStream) {
-        onStatusChangedListener(VideoCallStatus.CONNECTED)
+        onStatusChangedListener(VoiceCallStatus.CONNECTED)
         Log.i(TAG, "Got remote stream: $stream")
-        executor.execute {
-            if (stream.videoTracks.isNotEmpty()) {
-                val remoteVideoTrack = stream.videoTracks.first()
-                remoteVideoTrack.setEnabled(true)
-                remoteVideoTrack.addRenderer(VideoRenderer(videoRenderers.remoteRenderer))
-            }
-        }
+//        executor.execute {
+//            if (stream.videoTracks.isNotEmpty()) {
+//                val remoteVideoTrack = stream.videoTracks.first()
+//                remoteVideoTrack.setEnabled(true)
+////                remoteVideoTrack.addRenderer(VideoRenderer(videoRenderers.remoteRenderer))
+//            }
+//        }
     }
 
     private fun removeRemoteStream(@Suppress("UNUSED_PARAMETER") _stream: MediaStream) {
         // We lost the stream, lets finish
         Log.w(TAG, "Bye")
-        onStatusChangedListener(VideoCallStatus.FINISHED)
+        onStatusChangedListener(VoiceCallStatus.FINISHED)
     }
 
     private fun handleRemoteCandidate(label: Int, id: String, strCandidate: String) {
@@ -253,8 +249,6 @@ class VideoCallSession(
     private fun setupMediaDevices() {
         mediaStream = factory.createLocalMediaStream(STREAM_LABEL)
 
-        mediaStream?.addTrack(setupVideoTrack(isFront))
-
         audioSource = factory.createAudioSource(createAudioConstraints())
         val audioTrack = factory.createAudioTrack(AUDIO_TRACK_LABEL, audioSource)
 
@@ -263,18 +257,6 @@ class VideoCallSession(
         peerConnection?.addStream(mediaStream)
     }
 
-    private fun setupVideoTrack(front: Boolean): VideoTrack? {
-        val camera = if (useCamera2()) Camera2Enumerator(context) else Camera1Enumerator(false)
-
-        videoCapturer = if (front) createFrontCameraCapturer(camera) else createBackCameraCapturer(camera)
-        val videoSource = factory.createVideoSource(videoCapturer)
-        videoCapturer?.startCapture(videoHeight, videoWidth, videoFPS)
-        val videoRenderer = VideoRenderer(videoRenderers.localRenderer)
-
-        videoTrack = factory.createVideoTrack(VIDEO_TRACK_LABEL, videoSource)
-        videoTrack?.addRenderer(videoRenderer)
-        return videoTrack
-    }
 
     private fun createAudioConstraints(): MediaConstraints {
         val audioConstraints = MediaConstraints()
@@ -289,15 +271,24 @@ class VideoCallSession(
         if (isOfferingPeer) {
             peerConnection?.setRemoteDescription(SDPSetCallback { setError ->
                 if (setError != null) {
-                    Log.e(TAG, "setRemoteDescription failed: $setError")
+                    Log.e(
+                        TAG,
+                        "setRemoteDescription failed: $setError"
+                    )
                 }
             }, SessionDescription(SessionDescription.Type.ANSWER, sdp))
         } else {
             peerConnection?.setRemoteDescription(SDPSetCallback { setError ->
                 if (setError != null) {
-                    Log.e(TAG, "setRemoteDescription failed: $setError")
+                    Log.e(
+                        TAG,
+                        "setRemoteDescription failed: $setError"
+                    )
                 } else {
-                    peerConnection?.createAnswer(SDPCreateCallback(this::createDescriptorCallback), MediaConstraints())
+                    peerConnection?.createAnswer(
+                        SDPCreateCallback(this::createDescriptorCallback),
+                        MediaConstraints()
+                    )
                 }
             }, SessionDescription(SessionDescription.Type.OFFER, sdp))
         }
@@ -307,7 +298,10 @@ class VideoCallSession(
         when (result) {
             is SDPCreateSuccess -> {
                 peerConnection?.setLocalDescription(SDPSetCallback({ setResult ->
-                    Log.i(TAG, "SetLocalDescription: $setResult")
+                    Log.i(
+                        TAG,
+                        "SetLocalDescription: $setResult"
+                    )
                 }), result.descriptor)
                 signaler.sendSDP(result.descriptor.description)
             }
@@ -324,7 +318,9 @@ class VideoCallSession(
                 handleRemoteCandidate(message.label, message.id, message.candidate)
             }
             is PeerLeft -> {
-                onStatusChangedListener(VideoCallStatus.FINISHED)
+                Log.w(TAG, "Bye2")
+                onStatusChangedListener(VoiceCallStatus.FINISHED)
+
             }
         }
     }
@@ -332,13 +328,7 @@ class VideoCallSession(
 
     fun terminate() {
         signaler.close()
-        try {
-            videoCapturer?.stopCapture()
-        } catch (ex: Exception) {
-        }
 
-        videoCapturer?.dispose()
-        videoSource?.dispose()
 
         audioSource?.dispose()
 
@@ -349,52 +339,18 @@ class VideoCallSession(
         eglBase.release()
     }
 
-    private var isFront = true
 
-    fun toggleCamera() {
-        isFront = !isFront
-        mediaStream?.removeTrack(videoTrack)
-        videoTrack?.dispose()
-        mediaStream?.addTrack(setupVideoTrack(isFront))
-    }
-
-    private fun createFrontCameraCapturer(enumerator: CameraEnumerator): VideoCapturer? {
-        val deviceNames = enumerator.deviceNames
-        //find the front facing camera and return it.
-        deviceNames
-                .filter { enumerator.isFrontFacing(it) }
-                .mapNotNull { enumerator.createCapturer(it, null) }
-                .forEach { return it }
-
-        return null
-    }
-
-    private fun createBackCameraCapturer(enumerator: CameraEnumerator): VideoCapturer? {
-        // Front facing camera not found, try something else
-        Logging.d(TAG, "Looking for other cameras.")
-        val deviceNames = enumerator.deviceNames
-        //find the front facing camera and return it.
-        deviceNames
-                .filter { enumerator.isBackFacing(it) }
-                .mapNotNull {
-                    Logging.d(TAG, "Creating other camera capturer.")
-                    enumerator.createCapturer(it, null)
-                }
-                .forEach { return it }
-
-        Toast.makeText(context, "No back camera found!", Toast.LENGTH_SHORT).show()
-        return createFrontCameraCapturer(enumerator)
-    }
-
-    private fun useCamera2(): Boolean {
-        return Camera2Enumerator.isSupported(context)
-    }
 
     companion object {
 
-        fun connect(context: Context, id: String, isOffer: Boolean, videoRenderers: VideoRenderers, callback: (VideoCallStatus) -> Unit): VideoCallSession {
+        fun connect(context: Context, id: String, isOffer: Boolean, callback: (VoiceCallStatus) -> Unit): VoiceCallSession {
             val firebaseHandler = FirebaseSignaler(id)
-            return VideoCallSession(context, isOffer, callback, firebaseHandler, videoRenderers)
+            return VoiceCallSession(
+                context,
+                isOffer,
+                callback,
+                firebaseHandler
+            )
         }
 
         private const val STREAM_LABEL = "remoteStream"

@@ -7,10 +7,16 @@
         android:layout_height="match_parent"
         tools:context=".NotificationActivities.RecieveCall">
 
+    <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true" app:srcCompat="@drawable/ic_call_black_24dp"
+            android:layout_centerHorizontal="true" android:layout_alignParentBottom="false"
+            android:id="@+id/call2" app:fabSize="normal"/>
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="250dp" android:background="@color/colorConnected">
+            android:layout_height="250dp" android:background="@color/darkgreen">
         <TextView
                 android:text="VIDEO CALL"
                 android:layout_width="match_parent"
@@ -38,12 +44,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:id="@+id/textView4"
                 android:layout_gravity="center_horizontal" android:textAlignment="center"
-                android:layout_marginTop="20dp" android:textColor="@color/common_google_signin_btn_text_dark_default"/>
+                android:layout_marginTop="15dp" android:textColor="@color/common_google_signin_btn_text_dark_default"/>
     </LinearLayout>
     <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true" app:srcCompat="@android:drawable/stat_sys_phone_call"
+            android:clickable="true" app:srcCompat="@drawable/ic_chat_black_24dp"
             android:layout_alignParentStart="false" android:layout_alignParentBottom="true"
             android:id="@+id/acceptcall" app:backgroundTint="@color/colorConnected"
             android:layout_marginBottom="32dp" android:layout_alignParentEnd="true" android:layout_marginRight="32dp"

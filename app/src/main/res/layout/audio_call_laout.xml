@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+              android:layout_height="match_parent" android:orientation="vertical">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:layout_weight=".85" android:background="@color/darkgreen">
+        <TextView
+                android:text="VOICE CALL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/textView6"
+                android:layout_gravity="center_horizontal" android:textAlignment="center"
+                android:layout_marginTop="20dp" android:textColor="@color/common_google_signin_btn_text_dark_pressed"
+                android:textStyle="bold"/>
+        <TextView
+                android:text="Name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/callername"
+                android:layout_gravity="center_horizontal" android:textAlignment="center"
+                android:layout_marginTop="15dp" android:textSize="24sp"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"/>
+        <TextView
+                android:text="00.00"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/textView7"
+                android:layout_gravity="center_horizontal" android:textAlignment="center"
+                android:layout_marginTop="15dp" android:textColor="@color/common_google_signin_btn_text_dark_default"
+        />
+    </LinearLayout>
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:layout_weight=".4">
+
+        <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true" app:srcCompat="@drawable/ic_call_end_white_48dp"
+                android:id="@+id/hangup_button" app:backgroundTint="@color/colorFailed" app:fabSize="normal"
+                android:layout_centerHorizontal="true" android:layout_centerVertical="false"
+                android:layout_alignParentBottom="true" android:layout_marginBottom="25dp"/>
+    </RelativeLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:layout_weight="1" android:background="@color/darkgreen">
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp" app:srcCompat="@drawable/speaker" android:id="@+id/speaker"
+                android:layout_weight="1" android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp" android:paddingLeft="20dp" android:paddingRight="20dp"
+                android:paddingTop="10dp" android:paddingBottom="10dp" android:padding="12dp"/>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp" app:srcCompat="@drawable/ic_video_camera"
+                android:id="@+id/imageView4" android:layout_weight="1"
+                android:layout_gravity="center_vertical" android:paddingLeft="20dp" android:paddingRight="20dp"
+                android:paddingTop="10dp" android:paddingBottom="10dp" android:padding="12dp"/>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp" app:srcCompat="@drawable/microphoneoff"
+                android:id="@+id/microphone" android:layout_weight="1"
+                android:layout_gravity="center_vertical" android:layout_marginRight="10dp" android:paddingLeft="20dp"
+                android:paddingRight="20dp" android:paddingTop="10dp" android:paddingBottom="10dp"
+                android:padding="12dp"/>
+    </LinearLayout>
+</LinearLayout>
