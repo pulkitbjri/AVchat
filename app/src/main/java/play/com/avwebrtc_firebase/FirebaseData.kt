@@ -3,12 +3,6 @@ package play.com.avwebrtc_firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
-
-/**
- * Created by @author Jahongir on 13-Feb-18
- * devjn@jn-arts.com
- * FirebaseData
- */
 object FirebaseData {
 
     var myID: String = ""

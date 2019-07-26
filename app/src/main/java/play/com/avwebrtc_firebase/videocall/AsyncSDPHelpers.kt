@@ -3,9 +3,6 @@ package play.com.avwebrtc_firebase.videocall
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 
-/**
-* Created by Rafael on 01-23-18.
-*/
 
 
 interface SDPCreateResult

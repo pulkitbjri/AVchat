@@ -122,6 +122,7 @@ class VoiceCallSession(
         //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
         val options = PeerConnectionFactory.Options()
         options.networkIgnoreMask = 0
+        options.disableNetworkMonitor=false
         val defaultVideoEncoderFactory = DefaultVideoEncoderFactory(
                 renderContext, /* enableIntelVp8Encoder */true, /* enableH264HighProfile */true)
         val defaultVideoDecoderFactory = DefaultVideoDecoderFactory(renderContext)
